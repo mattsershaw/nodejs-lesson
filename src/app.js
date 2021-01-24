@@ -21,6 +21,10 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
 const mysql = require('mysql');
+const Todo = require('./model/Todo');
+const TodoRepository = require('./repository/TodoRepository');
+const TodoService = require('./service/TodoService');
+const TodoController = require('./controller/todoController');
 
 //#region expressでWebサーバーの設定
 
@@ -64,29 +68,97 @@ connection.connect((err) => {
 //     }
 // ]
 
-app.get('/', (req, res, next) => { // nextは使用しないが一応書いておく?
-    // res.json({sampleData});
-    const sql = 'select * from todos';
-    connection.query(sql, (err, results) => {
-        if (err) throw err;
-        res.json(results);
-    });
-});
+const todoRepository = new TodoRepository(connection);
+const todoService = new TodoService(todoRepository);
+const todoController = new TodoController(todoService);
 
-app.get('/:id', (req, res, next) => { // nextは使用しないが一応書いておく?
-    const id = parseInt(req.params.id);
-    const sql = 'select * from todos where ?';
-    connection.query(sql, {id: id},(err, results) => {
-        if (err) throw err;
-        res.json(results);
-    });
-    
-    
+app.use('/api/', todoController.router);
 
-});
+// const todoUrl = '/api/todos'
 
-// app.post('/', (req, res, next) => {
+// app.get(todoUrl, async (req, res,next) => {
+//     const todos = await todoService.getAll();
+//     res.status(200).json(todos);
+// });
+
+// app.get(todoUrl + '/:id', async (req, res, next) => {
+//     const id = parseInt(req.params.id);
+//     const todo = await todoService.get(id);
+//     res.status(200).json(todo);
+// });
+
+// app.post(todoUrl, async (req, res, next) => {
+//     const todo = new Todo(0, req.body.title, req.body.description);
+//     const insertId = await todoService.create(todo); // await書く時async必要
+//     res.status(201).json(insertId);
+// });
+
+// app.put(todoUrl + '/:id', async (req, res, next) => {
+//     const id = parseInt(req.params.id);
 //     const data = req.body;
-//     console.log(data);
-//     res.json(data);
+//     const todo = new Todo(id, data.title, data.description);
+//     const result = await todoService.update(todo);
+//     res.status(200).json(result);
+// });
+
+// app.delete(todoUrl + '/:id', async (req, res, next) => {
+//     const id = parseInt(req.params.id);
+//     const result = await todoService.delete(id);
+//     res.status(204).json(result);
+// });
+
+// -----------------------------------------------
+
+// app.get(todoUrl + '/', (req, res, next) => { // nextは使用しないが一応書いておく?
+//     // res.json({sampleData});
+//     const sql = 'select * from todos';
+//     connection.query(sql, (err, results) => {
+//         if (err) throw err;
+//         res.status(200).json(results); // 200で返す
+//     });
+// });
+
+// app.get(todoUrl + '/:id', (req, res, next) => { // nextは使用しないが一応書いておく?
+//     const id = parseInt(req.params.id);
+//     const sql = 'select * from todos where ?';
+//     connection.query(sql, {id: id},(err, results) => {
+//         if (err) throw err;
+//         res.status(200).json(results[0]); //[0]を追加
+//     });
+    
+    
+
+// });
+
+// app.post(todoUrl + '/', (req, res, next) => {
+//     const data = req.body;
+//     const sql = 'insert into todos set ?';
+//     // title,description values("title", "description")';
+//     connection.query(sql, data, (err, result) => {
+//         if (err) throw err;
+//         console.log(result)
+//         res.status(201).json(result.insertId);
+//     });
+//     // console.log(data);
+//     // res.json(data);
+// });
+
+// app.put(todoUrl + '/:id', (req, res, next) => {
+//     const id = parseInt(req.params.id);
+//     const data = req.body;
+//     const sql = 'update todos set ? where ?'; // `title`="test", `description`="test"
+//     connection.query(sql, [data, {id: id}], (err, result) => { // `id`="id"
+//         if (err) throw err;
+//         console.log(result)
+//         res.status(200).json(result);
+//     });
+// });
+
+// app.delete(todoUrl + '/:id', (req, res, next) => {
+//     const id = parseInt(req.params.id);
+//     const sql = 'delete from todos where ?'; // `id`=6
+//     connection.query(sql, {id: id}, (err, result) => {
+//         if (err) throw err;
+//         res.status(204).json(result);
+//     });
 // });

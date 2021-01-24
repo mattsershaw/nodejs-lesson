@@ -25,6 +25,6 @@ services:
       PMA_USER: root
       PMA_PASSWORD: rootPassword
     ports:
-      - 8080:80
+      - 8000:80
     links:
       - mysql:db
